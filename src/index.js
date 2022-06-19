@@ -14,6 +14,8 @@ io.on("connection", (socket) => {
 
   socket.emit("message", "Welcome");
 
+  
+
   socket.broadcast.emit("message","A new user has joined")
 
   socket.on("chat", (newMessage) => {
@@ -21,7 +23,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on('sendLocation',(coords,callback)=>{
-    io.emit('message',`https://google.com/maps?=${coords.lat},${coords.long}`)
+    socket.emit('locationMessage',`https://google.com/maps?=${coords.lat},${coords.long}`)
     callback()
   })
 
