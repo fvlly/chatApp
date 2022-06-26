@@ -2,14 +2,18 @@ const socket = io();
 
 //Elements
 const form = document.getElementById("form");   // use $ to indicate dom manipulation eg $form
-const formInput = form.querySelector('.message')
+const formInput = form.querySelector('.composer')
 const submitBtn = document.getElementById("submit-message");
 const sendBtn = document.getElementById('send-location')
-const messages = document.querySelector('.messages')
+const messages = document.querySelector('.chat__messages')
 
 // Template
 const templateMessage = document.querySelector("#message-template").innerHTML
 const locationTemplateMessage = document.querySelector("#location-message-template").innerHTML
+
+//Options
+
+const {username,room}= Qs.parse(location.search,{ignoreQueryPrefix:true})
 
 socket.on("message", ({text,createdAt}) => {
   console.log(text);
@@ -22,19 +26,22 @@ socket.on("message", ({text,createdAt}) => {
   messages.insertAdjacentHTML('beforeend',html)
 });
 
-socket.on('locationMessage',(url)=>{
+socket.on('locationMessage',({url,createdAt})=>{
   console.log(url);
-  const html = Mustache.render(locationTemplateMessage,{url})
+  const html = Mustache.render(locationTemplateMessage,{url,
+  createdAt:moment(createdAt).format('h:mm a')
+  })
   messages.insertAdjacentHTML('beforeend',html)
 })
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
-
+  console.log(e.target);
+  console.log(e.target.elements);
   //disable send btn
   submitBtn.setAttribute('disabled','disabled')
 
-  const newMessage = e.target.elements.message.value //document.querySelector(".message").value
+  const newMessage = e.target.elements.composer.value //document.querySelector(".message").value
   console.log(`line 13 ${newMessage}`);
   socket.emit('chat', newMessage);
   //enable after message is sent
@@ -64,3 +71,5 @@ sendBtn.addEventListener('click',()=>{
   })
 
 })
+
+socket.emit('join',{username,room})

@@ -1,7 +1,7 @@
 const http = require("http");
 const express = require("express");
 const socketio = require("socket.io");
-const {generateMessage} = require('./utils/messages')
+const {generateMessage,generateLocationMessage} = require('./utils/messages')
 
 const app = express();
 const server = http.createServer(app);
@@ -13,18 +13,21 @@ app.use(express.static("public"));
 io.on("connection", (socket) => {
   console.log(`A new user connected`);
 
-  socket.emit("message",generateMessage('Welcome'));
 
+  socket.on('join',({username,room})=>{
+    socket.join(room)
+
+    socket.emit("message",generateMessage('Welcome'));
+    socket.broadcast.to(room).emit("message",generateMessage(`${username} has joined`))
   
-
-  socket.broadcast.emit("message","A new user has joined")
+  })
 
   socket.on("chat", (newMessage) => {
     io.emit("message", generateMessage(newMessage));
   });
 
   socket.on('sendLocation',(coords,callback)=>{
-    socket.emit('locationMessage',`https://google.com/maps?=${coords.lat},${coords.long}`)
+    socket.emit('locationMessage',generateLocationMessage(`https://google.com/maps?=${coords.lat},${coords.long}`))
     callback()
   })
 
