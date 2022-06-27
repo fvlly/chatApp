@@ -1,7 +1,16 @@
 const http = require("http");
 const express = require("express");
 const socketio = require("socket.io");
-const {generateMessage,generateLocationMessage} = require('./utils/messages')
+const {
+  generateMessage,
+  generateLocationMessage,
+} = require("./utils/messages");
+const {
+  addUser,
+  removeUser,
+  getUser,
+  getUsersInRoom,
+} = require("./utils/users");
 
 const app = express();
 const server = http.createServer(app);
@@ -13,27 +22,47 @@ app.use(express.static("public"));
 io.on("connection", (socket) => {
   console.log(`A new user connected`);
 
+  socket.on("join", ({ username, room }, callback) => {
+    const { error, user } = addUser({ id: socket.id, username, room });
 
-  socket.on('join',({username,room})=>{
-    socket.join(room)
+    if (error) {
+      return callback(error);
+    }
 
-    socket.emit("message",generateMessage('Welcome'));
-    socket.broadcast.to(room).emit("message",generateMessage(`${username} has joined`))
-  
-  })
+    socket.join(user.room);
+
+    socket.emit("message", generateMessage("Welcome"));
+    socket.broadcast
+      .to(room)
+      .emit("message", generateMessage(`${user.username} has joined`));
+
+      callback()
+  });
 
   socket.on("chat", (newMessage) => {
     io.emit("message", generateMessage(newMessage));
   });
 
-  socket.on('sendLocation',(coords,callback)=>{
-    socket.emit('locationMessage',generateLocationMessage(`https://google.com/maps?=${coords.lat},${coords.long}`))
-    callback()
-  })
+  socket.on("sendLocation", (coords, callback) => {
+    socket.emit(
+      "locationMessage",
+      generateLocationMessage(
+        `https://google.com/maps?=${coords.lat},${coords.long}`
+      )
+    );
+    callback();
+  });
 
-  socket.on('disconnect',()=>{
-    io.emit('message',generateMessage('user just left'))
-      })
+  socket.on("disconnect", () => {
+
+    const user = removeUser(socket.id)
+
+    if (user) {
+      io.to(user.room).emit("message", generateMessage(user.username + " just left"));
+    }
+
+    
+  });
 });
 
 server.listen(PORT, () => console.log(`App is running on port ${PORT}`));

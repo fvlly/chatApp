@@ -54,13 +54,7 @@ const getUsersInRoom = (room) => {
   return users.filter((user) => room === user.room);
 };
 
-// addUser({ id: 22, username: "Andrew", room: "001" });
-// addUser({ id: 15, username: "Drew", room: "001" });
-// addUser({ id: 23, username: "Drew", room: "002" });
 
-// console.log(users, "line 65");
-// console.log(getUser(34));
-// console.log(getUsersInRoom("002"));
 
 module.exports = {
     addUser,getUser,removeUser,getUsersInRoom
