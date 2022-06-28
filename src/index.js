@@ -31,23 +31,28 @@ io.on("connection", (socket) => {
 
     socket.join(user.room);
 
-    socket.emit("message", generateMessage("Welcome"));
+    socket.emit("message", generateMessage('Admin',"Welcome"));
     socket.broadcast
       .to(room)
-      .emit("message", generateMessage(`${user.username} has joined`));
+      .emit("message", generateMessage("Admin",`${user.username} has joined`));
 
       callback()
   });
 
-  socket.on("chat", (newMessage) => {
-    io.emit("message", generateMessage(newMessage));
+  socket.on("sendMessage", (newMessage) => {
+    const {username,room} = getUser(socket.id)
+
+    io.to(room).emit("message", generateMessage(username,newMessage));
   });
 
   socket.on("sendLocation", (coords, callback) => {
-    socket.emit(
+    
+  const user = getUser(socket.id)
+
+    io.to(user.room).emit(
       "locationMessage",
       generateLocationMessage(
-        `https://google.com/maps?=${coords.lat},${coords.long}`
+        user.username,`https://google.com/maps?=${coords.lat},${coords.long}`
       )
     );
     callback();

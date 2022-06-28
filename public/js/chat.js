@@ -15,9 +15,10 @@ const locationTemplateMessage = document.querySelector("#location-message-templa
 
 const {username,room}= Qs.parse(location.search,{ignoreQueryPrefix:true})
 
-socket.on("message", ({text,createdAt}) => {
+socket.on("message", ({username,text,createdAt}) => {
   console.log(text);
   const html = Mustache.render(templateMessage,{
+    username,
     text,
     createdAt:moment(createdAt).format('h:mm a'),
 
@@ -26,9 +27,9 @@ socket.on("message", ({text,createdAt}) => {
   messages.insertAdjacentHTML('beforeend',html)
 });
 
-socket.on('locationMessage',({url,createdAt})=>{
+socket.on('locationMessage',({username,url,createdAt})=>{
   console.log(url);
-  const html = Mustache.render(locationTemplateMessage,{url,
+  const html = Mustache.render(locationTemplateMessage,{username,url,
   createdAt:moment(createdAt).format('h:mm a')
   })
   messages.insertAdjacentHTML('beforeend',html)
@@ -43,7 +44,7 @@ form.addEventListener("submit", (e) => {
 
   const newMessage = e.target.elements.composer.value //document.querySelector(".message").value
   console.log(`line 13 ${newMessage}`);
-  socket.emit('chat', newMessage);
+  socket.emit('sendMessage', newMessage);
   //enable after message is sent
   submitBtn.removeAttribute('disabled')
   formInput.value = ''

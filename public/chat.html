@@ -21,6 +21,8 @@
               class="composer"
               data-message="message"
               placeholder="Enter message"
+              required
+              autocomplete="off"
             />
             <button id="submit-message" type="submit">Send</button>
           </form>
@@ -32,7 +34,7 @@
     <script id="message-template" type="text/html">
       <div class="message">
         <p>
-          <span class="message__name">Fvlly</span>
+          <span class="message__name">{{username}}</span>
           <span class="message__meta">{{createdAt}}</span>
         </p>
         <p>{{text}}</p>
@@ -41,7 +43,7 @@
     <script id="location-message-template" type="text/html">
       <div class="message">
         <p>
-          <span class="message__name">Fvlly</span>
+          <span class="message__name">{{username}}</span>
           <span class="message__meta">{{createdAt}}</span>
         </p>
 
